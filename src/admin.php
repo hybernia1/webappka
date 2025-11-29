@@ -1,4 +1,5 @@
 <?php
+use Cocur\Slugify\Slugify;
 use RedBeanPHP\R as R;
 use Web\App\UploadManager;
 
@@ -340,10 +341,19 @@ function adminGenerateUniqueSlug(string $slugCandidate, ?int $currentId = null):
 
 function adminSlugify(string $text): string
 {
+    static $slugify;
+
+    if (!$slugify && class_exists(Slugify::class)) {
+        $slugify = new Slugify();
+    }
+
+    if ($slugify instanceof Slugify) {
+        return $slugify->slugify($text);
+    }
+
     $text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
     $text = strtolower($text);
     $text = preg_replace('/[^a-z0-9]+/i', '-', $text);
-    $text = trim($text, '-');
 
-    return $text;
+    return trim($text, '-');
 }
