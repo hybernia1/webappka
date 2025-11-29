@@ -1,0 +1,29 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<h2>Příspěvky</h2>
+<p><a class="button" href="?action=post_edit">Nový příspěvek</a></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Název</th>
+            <th>Publikováno</th>
+            <th>Akce</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in posts %}
+            <tr>
+                <td>{{ post.title }}</td>
+                <td>{{ post.published_at|date('j.n.Y H:i') }}</td>
+                <td><a href="?action=post_edit&id={{ post.id }}">Upravit</a></td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Zatím žádné příspěvky.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

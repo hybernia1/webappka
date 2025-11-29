@@ -1,0 +1,27 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<h2>{{ title }}</h2>
+
+{% if errors %}
+    <div class="alert error">
+        {% for error in errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<form method="post">
+    {% if post %}
+        <input type="hidden" name="id" value="{{ post.id }}">
+    {% endif %}
+
+    <label for="title">Název</label>
+    <input type="text" id="title" name="title" value="{{ post.title ?? '' }}" required>
+
+    <label for="content">Obsah</label>
+    <textarea id="content" name="content" rows="10">{{ post.content ?? '' }}</textarea>
+
+    <button type="submit">Uložit</button>
+</form>
+{% endblock %}

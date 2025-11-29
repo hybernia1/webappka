@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<div class="admin-nav">
+    <strong>Administrace</strong> |
+    <a href="?action=dashboard">Přehled</a>
+    <a href="?action=posts">Příspěvky</a>
+    <a href="?action=post_edit">Nový příspěvek</a>
+    <a href="?action=settings">Nastavení</a>
+    <a href="?action=users">Uživatelé</a>
+    <a href="?action=logout">Odhlásit</a>
+</div>
+<div class="admin-content">
+    {% block admin_content %}{% endblock %}
+</div>
+{% endblock %}

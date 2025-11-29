@@ -5,22 +5,48 @@ use Twig\Loader\FilesystemLoader;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// 1) Připojení k databázi (příklad: MySQL)
+$configPath = __DIR__ . '/../config/config.php';
+
+if (!file_exists($configPath)) {
+    if (PHP_SAPI !== 'cli' && (strpos($_SERVER['REQUEST_URI'] ?? '', '/install') !== 0)) {
+        header('Location: /install/');
+        exit;
+    }
+
+    throw new RuntimeException('Chybí konfigurační soubor. Spusť instalaci v adresáři /install.');
+}
+
+$config = require $configPath;
+
+if (!isset($config['dsn'])) {
+    throw new RuntimeException('V konfiguraci chybí DSN pro databázové připojení.');
+}
+
 R::setup(
-    'mysql:host=db.dw173.webglobe.com;dbname=iluze_net6;charset=utf8mb4',
-    'iluze_net6',
-    'p27uuejD'
+    $config['dsn'],
+    $config['user'] ?? null,
+    $config['password'] ?? null
 );
 
-// Volitelné: v produkci vypnout automatické změny schématu
-// R::freeze(true);
+if (!R::testConnection()) {
+    throw new RuntimeException('Nepodařilo se připojit k databázi.');
+}
 
-// 2) Twig – načtení šablon z /templates
+if (!empty($config['freeze'])) {
+    R::freeze(true);
+}
+
 $loader = new FilesystemLoader(__DIR__ . '/../templates');
 $twig = new Environment($loader, [
-    'cache' => false, // v produkci můžeš nastavit např. __DIR__.'/../var/cache/twig'
+    'cache' => false,
 ]);
 
-// 3) Globální proměnné pro Twig – např. základní title, base_url atd.
-$twig->addGlobal('site_name', 'Moje RedBean + Twig App');
-$twig->addGlobal('base_url', '/'); // případně /mojeapp/ apod.
+$settingsMap = [];
+$settings = R::findAll('setting');
+foreach ($settings as $setting) {
+    $settingsMap[$setting->key] = $setting->value;
+}
+
+$twig->addGlobal('site_name', $settingsMap['site_name'] ?? $config['site_name'] ?? 'Webappka CMS');
+$twig->addGlobal('base_url', $settingsMap['base_url'] ?? $config['base_url'] ?? '/');
+$twig->addGlobal('settings', $settingsMap);

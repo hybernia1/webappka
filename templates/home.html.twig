@@ -1,20 +1,25 @@
-{% extends "base.html.twig" %}
+{% extends 'base.html.twig' %}
 
 {% block content %}
-    <h2>Seznam položek</h2>
+<section class="hero">
+    <h2>Aktuální příspěvky</h2>
+    <p>Vítej v nové verzi webappky s jednoduchým CMS.</p>
+</section>
 
-    {% if items is not empty %}
-        <ul>
-            {% for item in items %}
-                <li>
-                    <a href="?page=item&id={{ item.id }}">
-                        {{ item.title|e }}
-                    </a>
-                    <small>({{ item.created_at }})</small>
+<section class="list">
+    {% if posts is empty %}
+        <p>Zatím tu nejsou žádné příspěvky. Přidej je v administraci.</p>
+    {% else %}
+        <ul class="post-list">
+            {% for post in posts %}
+                <li class="post-card">
+                    <h3><a href="?page=post&id={{ post.id }}">{{ post.title }}</a></h3>
+                    <p class="meta">Publikováno: {{ post.published_at|date('j.n.Y H:i') }}</p>
+                    <p>{{ post.content|slice(0, 160) }}{% if post.content|length > 160 %}…{% endif %}</p>
+                    <a class="button" href="?page=post&id={{ post.id }}">Číst dál</a>
                 </li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>Zatím žádné položky.</p>
     {% endif %}
+</section>
 {% endblock %}
