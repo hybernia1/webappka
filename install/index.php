@@ -2,6 +2,8 @@
 use RedBeanPHP\R as R;
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../src/schema.php';
+require __DIR__ . '/../src/admin.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
@@ -100,11 +102,14 @@ if ($step === 'site') {
                     throw new RuntimeException('Nepodařilo se znovu připojit k databázi.');
                 }
 
+                ensureDatabaseSchema();
+
                 // vytvoření tabulek
                 $userBean = R::findOne('user', ' username = ? ', [$adminUser]) ?: R::dispense('user');
                 $userBean->username = $adminUser;
                 $userBean->password_hash = password_hash($adminPass, PASSWORD_BCRYPT);
                 $userBean->role = 'admin';
+                $userBean->level = adminRoleLevels()['admin'];
                 $userBean->created_at = $userBean->created_at ?: date('Y-m-d H:i:s');
                 R::store($userBean);
 

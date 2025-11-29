@@ -9,7 +9,7 @@ class UploadManager
 
     public function __construct(?string $basePath = null, string $publicPrefix = '/uploads')
     {
-        $this->basePath = $basePath ?: __DIR__ . '/../uploads';
+        $this->basePath = $basePath ?: dirname(__DIR__, 2) . '/uploads';
         $this->publicPrefix = rtrim($publicPrefix, '/');
     }
 

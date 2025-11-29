@@ -12,6 +12,11 @@ const ADMIN_LEVELS = [
     'viewer'      => 10,
 ];
 
+function adminRoleLevels(): array
+{
+    return ADMIN_LEVELS;
+}
+
 function adminCurrentUser(): ?array
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -29,11 +34,21 @@ function adminCurrentUser(): ?array
         return null;
     }
 
+    $level = $user->level ?? null;
+    $roleLevels = adminRoleLevels();
+    $fallbackLevel = $roleLevels[$user->role] ?? ADMIN_LEVELS['viewer'];
+
+    if ($level === null || $level === '') {
+        $level = $fallbackLevel;
+        $user->level = $level;
+        R::store($user);
+    }
+
     return [
         'id'       => $user->id,
         'username' => $user->username,
         'role'     => $user->role,
-        'level'    => $user->level ?? ADMIN_LEVELS['viewer'],
+        'level'    => $level,
     ];
 }
 
@@ -103,6 +118,7 @@ function adminSavePost(): array
             if ($thumbnailUpload && ($thumbnailUpload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 try {
                     $thumbnailUrl = $uploadManager->storeImage($thumbnailUpload);
+                    adminRecordUpload($thumbnailUrl, 'image', $thumbnailUpload);
                 } catch (\Throwable $e) {
                     $errors[] = 'Náhledový obrázek se nepodařilo nahrát: ' . $e->getMessage();
                 }
@@ -275,11 +291,26 @@ function adminHandleUpload(?UploadManager $uploadManager = null): array
         } else {
             $success = $uploadManager->storeImage($file);
         }
+
+        adminRecordUpload($success, $type, $file);
     } catch (\Throwable $e) {
         $errors[] = $e->getMessage();
     }
 
     return [$errors, $success];
+}
+
+function adminRecordUpload(string $path, string $type, array $file): void
+{
+    $upload = R::dispense('upload');
+    $upload->path = $path;
+    $upload->type = $type;
+    $upload->original_name = $file['name'] ?? null;
+    $upload->mime_type = $file['type'] ?? null;
+    $upload->size = $file['size'] ?? null;
+    $upload->created_at = date('Y-m-d H:i:s');
+
+    R::store($upload);
 }
 
 function adminHasLevel(int $level): bool
