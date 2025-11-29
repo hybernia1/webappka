@@ -390,7 +390,7 @@ function adminManageTaxonomy(string $table): array
     $saved = false;
     $editing = null;
 
-    if (!in_array($table, ['category', 'tag', 'post_type'], true)) {
+    if (!in_array($table, ['category', 'tag', 'posttype'], true)) {
         return [['Neznámý typ taxonomie.'], false];
     }
 
