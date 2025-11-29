@@ -8,14 +8,14 @@ function fetchPostType(?int $postTypeId): ?array
         return null;
     }
 
-    $type = R::getRow('SELECT * FROM post_type WHERE id = ?', [$postTypeId]);
+    $type = R::getRow('SELECT * FROM posttype WHERE id = ?', [$postTypeId]);
 
     return $type ?: null;
 }
 
 function fetchAllPostTypes(): array
 {
-    return R::getAll('SELECT * FROM post_type ORDER BY name ASC');
+    return R::getAll('SELECT * FROM posttype ORDER BY name ASC');
 }
 
 function fetchAllCategories(): array

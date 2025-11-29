@@ -98,7 +98,7 @@ switch ($action) {
         break;
 
     case 'post_types':
-        [$errors, $saved, $editing] = adminManageTaxonomy('post_type');
+        [$errors, $saved, $editing] = adminManageTaxonomy('posttype');
         $types = fetchAllPostTypes();
         echo $twig->render('admin/taxonomy.html.twig', [
             'errors'     => $errors,

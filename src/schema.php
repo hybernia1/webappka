@@ -52,7 +52,7 @@ function createTables(): void
     SQL);
 
     R::exec(<<<SQL
-        CREATE TABLE IF NOT EXISTS `post_type` (
+        CREATE TABLE IF NOT EXISTS `posttype` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `name` VARCHAR(190) NOT NULL,
             `slug` VARCHAR(190) NOT NULL UNIQUE,
@@ -137,10 +137,10 @@ function ensurePostTypeColumn(): void
 
 function seedDefaultPostType(): void
 {
-    $existing = R::count('post_type');
+    $existing = R::count('posttype');
 
     if ($existing === 0) {
-        $postType = R::dispense('post_type');
+        $postType = R::dispense('posttype');
         $postType->name = 'Příspěvek';
         $postType->slug = 'post';
         $postType->description = 'Výchozí typ obsahu.';
