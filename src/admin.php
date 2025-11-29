@@ -98,7 +98,13 @@ function adminSavePost(): array
         $thumbnailUrl = trim($_POST['thumbnail_url'] ?? '');
         $slugInput = trim($_POST['slug'] ?? '');
         $excerpt = trim($_POST['excerpt'] ?? '');
-        $tagsInput = trim($_POST['tags'] ?? '');
+        $postTypeId = isset($_POST['post_type_id']) ? (int) $_POST['post_type_id'] : null;
+        $categoryIds = isset($_POST['categories']) && is_array($_POST['categories'])
+            ? array_map('intval', $_POST['categories'])
+            : [];
+        $tagIds = isset($_POST['tags']) && is_array($_POST['tags'])
+            ? array_map('intval', $_POST['tags'])
+            : [];
 
         if ($content === '') {
             $errors[] = 'Obsah příspěvku je povinný.';
@@ -106,6 +112,21 @@ function adminSavePost(): array
 
         if ($title === '') {
             $errors[] = 'Název je povinný.';
+        }
+
+        $availableTypes = fetchAllPostTypes();
+        $availableTypeIds = array_map(fn ($type) => (int) $type['id'], $availableTypes);
+
+        if (!$availableTypeIds) {
+            $errors[] = 'Není dostupný žádný typ obsahu. Nejprve ho vytvoř.';
+        }
+
+        if ($postTypeId === null && $availableTypeIds) {
+            $postTypeId = $availableTypeIds[0];
+        }
+
+        if ($postTypeId && !in_array($postTypeId, $availableTypeIds, true)) {
+            $errors[] = 'Zvolený typ obsahu neexistuje.';
         }
 
         if ($thumbnailUrl !== '' && !filter_var($thumbnailUrl, FILTER_VALIDATE_URL)) {
@@ -127,17 +148,22 @@ function adminSavePost(): array
         }
 
         if (!$errors) {
-            $tags = array_filter(array_map('trim', explode(',', $tagsInput)));
-
             $post = $currentId ? R::load('post', $currentId) : R::dispense('post');
             $post->title = $title;
             $post->content = $content;
             $post->thumbnail_url = $thumbnailUrl ?: null;
             $post->excerpt = $excerpt !== '' ? $excerpt : null;
-            $post->tags = $tags ? implode(',', $tags) : null;
+            $post->post_type_id = $postTypeId;
             $post->slug = adminGenerateUniqueSlug($slugInput !== '' ? $slugInput : $title, $post->id ?: null);
             $post->published_at = $post->published_at ?: date('Y-m-d H:i:s');
             $post->updated_at = date('Y-m-d H:i:s');
+            R::store($post);
+
+            syncPostRelations($post->id, $categoryIds, 'post_category', 'category_id');
+            syncPostRelations($post->id, $tagIds, 'post_tag', 'tag_id');
+
+            $tagNames = fetchTagNamesByIds($tagIds);
+            $post->tags = $tagNames ? implode(',', $tagNames) : null;
             R::store($post);
 
             header('Location: ?action=posts');
@@ -337,6 +363,91 @@ function adminGenerateUniqueSlug(string $slugCandidate, ?int $currentId = null):
     }
 
     return $slug;
+}
+
+function adminGenerateUniqueTermSlug(string $slugCandidate, string $table, ?int $currentId = null): string
+{
+    $baseSlug = adminSlugify($slugCandidate);
+
+    if ($baseSlug === '') {
+        $baseSlug = $table . '-polozka';
+    }
+
+    $slug = $baseSlug;
+    $counter = 2;
+
+    while (R::count($table, ' slug = ? AND id != ? ', [$slug, $currentId ?? 0])) {
+        $slug = $baseSlug . '-' . $counter;
+        $counter++;
+    }
+
+    return $slug;
+}
+
+function adminManageTaxonomy(string $table): array
+{
+    $errors = [];
+    $saved = false;
+    $editing = null;
+
+    if (!in_array($table, ['category', 'tag', 'post_type'], true)) {
+        return [['Neznámý typ taxonomie.'], false];
+    }
+
+    if (isset($_GET['delete']) && adminHasLevel(ADMIN_LEVELS['editor'])) {
+        $deleteId = (int) $_GET['delete'];
+        $bean = R::load($table, $deleteId);
+        if ($bean->id) {
+            R::trash($bean);
+            $saved = true;
+        }
+    }
+
+    if (isset($_GET['edit'])) {
+        $editing = R::load($table, (int) $_GET['edit']);
+        if (!$editing->id) {
+            $editing = null;
+        }
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!adminHasLevel(ADMIN_LEVELS['editor'])) {
+            return [['Nemáš oprávnění upravovat tuto sekci.'], false];
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : null;
+        $name = trim($_POST['name'] ?? '');
+        $slugInput = trim($_POST['slug'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+
+        if ($name === '') {
+            $errors[] = 'Název je povinný.';
+        }
+
+        if (!$errors) {
+            $slug = adminGenerateUniqueTermSlug($slugInput !== '' ? $slugInput : $name, $table, $id);
+            $existing = R::findOne($table, ' slug = ? AND id != ? ', [$slug, $id ?? 0]);
+
+            if ($existing) {
+                $errors[] = 'Slug musí být unikátní.';
+            }
+        }
+
+        if (!$errors) {
+            $bean = $id ? R::load($table, $id) : R::dispense($table);
+            $bean->name = $name;
+            $bean->slug = $slug;
+            $bean->description = $description !== '' ? $description : null;
+            $bean->created_at = $bean->created_at ?: date('Y-m-d H:i:s');
+            $bean->updated_at = date('Y-m-d H:i:s');
+            R::store($bean);
+
+            $saved = true;
+            $editing = null;
+        }
+    }
+
+    return [$errors, $saved, $editing];
 }
 
 function adminSlugify(string $text): string

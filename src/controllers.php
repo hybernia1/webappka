@@ -4,6 +4,9 @@ use RedBeanPHP\R as R;
 function homeController($twig)
 {
     $posts = R::findAll('post', ' ORDER BY published_at DESC ');
+    foreach ($posts as $post) {
+        hydratePostWithRelations($post);
+    }
     $settings = fetchSettings();
 
     echo $twig->render('home.html.twig', [
@@ -31,6 +34,8 @@ function postDetailController($twig, int $id)
         ]);
         return;
     }
+
+    hydratePostWithRelations($post);
 
     echo $twig->render('post_detail.html.twig', [
         'page_title' => $post->title,
