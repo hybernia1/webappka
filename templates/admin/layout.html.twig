@@ -1,16 +1,24 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-<div class="admin-nav">
-    <strong>Administrace</strong> |
-    <a href="?action=dashboard">Přehled</a>
-    <a href="?action=posts">Příspěvky</a>
-    <a href="?action=post_edit">Nový příspěvek</a>
-    <a href="?action=settings">Nastavení</a>
-    <a href="?action=users">Uživatelé</a>
-    <a href="?action=logout">Odhlásit</a>
-</div>
-<div class="admin-content">
-    {% block admin_content %}{% endblock %}
+<div class="row g-4">
+    <div class="col-lg-3">
+        <div class="list-group shadow-sm">
+            <div class="list-group-item active">Administrace</div>
+            <a class="list-group-item list-group-item-action" href="?action=dashboard">Přehled</a>
+            <a class="list-group-item list-group-item-action" href="?action=posts">Příspěvky</a>
+            <a class="list-group-item list-group-item-action" href="?action=post_edit">Nový příspěvek</a>
+            <a class="list-group-item list-group-item-action" href="?action=settings">Nastavení</a>
+            <a class="list-group-item list-group-item-action" href="?action=users">Uživatelé</a>
+            <a class="list-group-item list-group-item-action text-danger" href="?action=logout">Odhlásit</a>
+        </div>
+    </div>
+    <div class="col-lg-9">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% block admin_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

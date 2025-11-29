@@ -3,13 +3,34 @@
 {% block content %}
 <section class="detail">
     {% if post %}
-        <h2>{{ post.title }}</h2>
-        <p class="meta">Publikováno: {{ post.published_at|date('j.n.Y H:i') }}</p>
-        <article>
-            {{ post.content|nl2br }}
-        </article>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <div>
+                        <h2 class="mb-1">{{ post.title }}</h2>
+                        <p class="text-muted mb-0">Publikováno: {{ post.published_at|date('j.n.Y H:i') }}</p>
+                    </div>
+                    {% set tags = post.tags ? post.tags|split(',') : [] %}
+                    {% if tags %}
+                        <div class="text-end">
+                            {% for tag in tags %}
+                                <span class="badge text-bg-secondary ms-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if post.thumbnail_url %}
+                    <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="img-fluid rounded mb-3 shadow-sm">
+                {% endif %}
+
+                <article class="bg-white rounded shadow-sm p-3">
+                    {{ post.content|nl2br }}
+                </article>
+            </div>
+        </div>
     {% else %}
-        <p>Příspěvek nebyl nalezen.</p>
+        <div class="alert alert-warning">Příspěvek nebyl nalezen.</div>
     {% endif %}
 </section>
 {% endblock %}
