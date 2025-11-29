@@ -6,6 +6,7 @@ use Twig\Loader\FilesystemLoader;
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../packages/upload-manager/src/UploadManager.php';
 require __DIR__ . '/settings.php';
+require __DIR__ . '/schema.php';
 
 $configPath = __DIR__ . '/../config/config.php';
 
@@ -37,6 +38,8 @@ if (!R::testConnection()) {
 if (!empty($config['freeze'])) {
     R::freeze(true);
 }
+
+ensureDatabaseSchema();
 
 $loader = new FilesystemLoader(__DIR__ . '/../templates');
 $twig = new Environment($loader, [
