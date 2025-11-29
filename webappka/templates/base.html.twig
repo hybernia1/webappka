@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% if page_title is defined %}
+            {{ page_title }} | {{ site_name }}
+        {% else %}
+            {{ site_name }}
+        {% endif %}
+    </title>
+
+    {% block meta %}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% endblock %}
+
+    {% block styles %}
+        <link rel="stylesheet" href="{{ base_url }}assets/style.css">
+    {% endblock %}
+</head>
+<body>
+<header>
+    <h1><a href="{{ base_url }}"> {{ site_name }} </a></h1>
+    <nav>
+        <a href="{{ base_url }}">Domů</a>
+        <a href="?page=item_create">Nová položka</a>
+    </nav>
+</header>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <p>&copy; {{ "now"|date("Y") }} – {{ site_name }}</p>
+</footer>
+
+{% block scripts %}
+    {# sem můžeš vkládat JS soubory, např. podle stránky #}
+{% endblock %}
+</body>
+</html>
