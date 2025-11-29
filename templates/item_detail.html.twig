@@ -1,0 +1,13 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    {% if item %}
+        <article>
+            <h2>{{ item.title|e }}</h2>
+            <p>{{ item.content|nl2br }}</p>
+            <p><small>Vytvořeno: {{ item.created_at }}</small></p>
+        </article>
+    {% else %}
+        <p>Položka nenalezena.</p>
+    {% endif %}
+{% endblock %}

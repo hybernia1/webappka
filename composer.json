@@ -1,0 +1,19 @@
+{
+    "name": "web/app",
+    "description": "aplikace pro basic cms, e-shop apod",
+    "type": "project",
+    "require": {
+        "gabordemooij/redbean": "^5.7",
+        "twig/twig": "^3.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "Web\\App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nikola"
+        }
+    ]
+}
