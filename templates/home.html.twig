@@ -22,7 +22,7 @@
                         {% endif %}
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex align-items-start justify-content-between mb-2">
-                                <h3 class="h5 mb-0"><a class="text-decoration-none" href="?page=post&id={{ post.id }}">{{ post.title }}</a></h3>
+                                <h3 class="h5 mb-0"><a class="text-decoration-none" href="?page=post&slug={{ post.slug ?? post.id }}">{{ post.title }}</a></h3>
                                 <span class="text-muted small ms-2">{{ post.published_at|date('j.n.Y') }}</span>
                             </div>
                             {% if tags %}
@@ -33,7 +33,7 @@
                                 </div>
                             {% endif %}
                             <p class="card-text flex-grow-1">{{ (post.excerpt ?? post.content)|slice(0, 160) }}{% if (post.excerpt ?? post.content)|length > 160 %}…{% endif %}</p>
-                            <a class="btn btn-outline-primary mt-auto" href="?page=post&id={{ post.id }}">Číst dál</a>
+                            <a class="btn btn-outline-primary mt-auto" href="?page=post&slug={{ post.slug ?? post.id }}">Číst dál</a>
                         </div>
                     </div>
                 </div>

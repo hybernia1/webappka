@@ -15,7 +15,13 @@ function homeController($twig)
 
 function postDetailController($twig, int $id)
 {
-    $post = R::load('post', $id);
+    $slug = $_GET['slug'] ?? null;
+
+    if ($slug) {
+        $post = R::findOne('post', ' slug = ? ', [$slug]);
+    } else {
+        $post = R::load('post', $id);
+    }
 
     if (!$post->id) {
         http_response_code(404);

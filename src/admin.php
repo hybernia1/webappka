@@ -1,5 +1,16 @@
 <?php
 use RedBeanPHP\R as R;
+use Web\App\UploadManager;
+
+const ADMIN_LEVELS = [
+    'superadmin'  => 100,
+    'admin'       => 80,
+    'manager'     => 70,
+    'editor'      => 60,
+    'author'      => 40,
+    'contributor' => 30,
+    'viewer'      => 10,
+];
 
 function adminCurrentUser(): ?array
 {
@@ -22,6 +33,7 @@ function adminCurrentUser(): ?array
         'id'       => $user->id,
         'username' => $user->username,
         'role'     => $user->role,
+        'level'    => $user->level ?? ADMIN_LEVELS['viewer'],
     ];
 }
 
@@ -58,14 +70,19 @@ function adminHandleLogin(): array
 function adminSavePost(): array
 {
     $errors = [];
+    $currentId = isset($_POST['id']) ? (int) $_POST['id'] : null;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !adminHasLevel(ADMIN_LEVELS['author'])) {
+        return ['Nemáš oprávnění ukládat příspěvky.'];
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
         $thumbnailUrl = trim($_POST['thumbnail_url'] ?? '');
+        $slugInput = trim($_POST['slug'] ?? '');
         $excerpt = trim($_POST['excerpt'] ?? '');
         $tagsInput = trim($_POST['tags'] ?? '');
-        $id = isset($_POST['id']) ? (int) $_POST['id'] : null;
 
         if ($content === '') {
             $errors[] = 'Obsah příspěvku je povinný.';
@@ -80,14 +97,28 @@ function adminSavePost(): array
         }
 
         if (!$errors) {
+            $uploadManager = new UploadManager();
+            $thumbnailUpload = $_FILES['thumbnail_upload'] ?? null;
+
+            if ($thumbnailUpload && ($thumbnailUpload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                try {
+                    $thumbnailUrl = $uploadManager->storeImage($thumbnailUpload);
+                } catch (\Throwable $e) {
+                    $errors[] = 'Náhledový obrázek se nepodařilo nahrát: ' . $e->getMessage();
+                }
+            }
+        }
+
+        if (!$errors) {
             $tags = array_filter(array_map('trim', explode(',', $tagsInput)));
 
-            $post = $id ? R::load('post', $id) : R::dispense('post');
+            $post = $currentId ? R::load('post', $currentId) : R::dispense('post');
             $post->title = $title;
             $post->content = $content;
             $post->thumbnail_url = $thumbnailUrl ?: null;
             $post->excerpt = $excerpt !== '' ? $excerpt : null;
             $post->tags = $tags ? implode(',', $tags) : null;
+            $post->slug = adminGenerateUniqueSlug($slugInput !== '' ? $slugInput : $title, $post->id ?: null);
             $post->published_at = $post->published_at ?: date('Y-m-d H:i:s');
             $post->updated_at = date('Y-m-d H:i:s');
             R::store($post);
@@ -105,6 +136,10 @@ function adminSaveSettings(): array
     $errors = [];
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!adminHasLevel(ADMIN_LEVELS['manager'])) {
+            return ['Nemáš oprávnění měnit nastavení.'];
+        }
+
         $siteName = trim($_POST['site_name'] ?? '');
         $baseUrl = trim($_POST['base_url'] ?? '/');
 
@@ -149,4 +184,135 @@ function adminSaveSettings(): array
     }
 
     return $errors;
+}
+
+function adminManageUsers(): array
+{
+    $errors = [];
+    $userForEdit = null;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!adminHasLevel(ADMIN_LEVELS['admin'])) {
+            return [['Nemáš oprávnění spravovat uživatele.'], $userForEdit];
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : null;
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? 'editor';
+
+        if ($username === '') {
+            $errors[] = 'Uživatelské jméno je povinné.';
+        }
+
+        if (!array_key_exists($role, ADMIN_LEVELS)) {
+            $errors[] = 'Neplatná role.';
+        }
+
+        $existing = R::findOne('user', ' username = ? AND id != ? ', [$username, $id ?? 0]);
+        if ($existing) {
+            $errors[] = 'Uživatel s tímto jménem již existuje.';
+        }
+
+        $user = $id ? R::load('user', $id) : R::dispense('user');
+
+        if (!$id && $password === '') {
+            $errors[] = 'Pro nový účet je heslo povinné.';
+        }
+
+        if (!$errors) {
+            $user->username = $username;
+            $user->role = $role;
+            $user->level = ADMIN_LEVELS[$role];
+            if ($password !== '') {
+                $user->password_hash = password_hash($password, PASSWORD_DEFAULT);
+            }
+            $user->created_at = $user->created_at ?: date('Y-m-d H:i:s');
+            $user->updated_at = date('Y-m-d H:i:s');
+            R::store($user);
+
+            header('Location: ?action=users&saved=1');
+            exit;
+        }
+
+        $userForEdit = $user;
+    }
+
+    if (isset($_GET['id'])) {
+        $userForEdit = R::load('user', (int) $_GET['id']);
+        if (!$userForEdit->id) {
+            $userForEdit = null;
+        }
+    }
+
+    return [$errors, $userForEdit];
+}
+
+function adminHandleUpload(?UploadManager $uploadManager = null): array
+{
+    $errors = [];
+    $success = null;
+    $uploadManager = $uploadManager ?: new UploadManager();
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return [$errors, $success];
+    }
+
+    if (!adminHasLevel(ADMIN_LEVELS['author'])) {
+        return [['Nemáš oprávnění nahrávat soubory.'], $success];
+    }
+
+    $type = $_POST['upload_type'] ?? 'image';
+    $file = $_FILES['uploaded_file'] ?? null;
+
+    if (!$file) {
+        return [['Nebyl vybrán soubor k nahrání.'], $success];
+    }
+
+    try {
+        if ($type === 'file') {
+            $success = $uploadManager->storeFile($file);
+        } else {
+            $success = $uploadManager->storeImage($file);
+        }
+    } catch (\Throwable $e) {
+        $errors[] = $e->getMessage();
+    }
+
+    return [$errors, $success];
+}
+
+function adminHasLevel(int $level): bool
+{
+    $current = adminCurrentUser();
+    return $current && (($current['level'] ?? 0) >= $level);
+}
+
+function adminGenerateUniqueSlug(string $slugCandidate, ?int $currentId = null): string
+{
+    $baseSlug = adminSlugify($slugCandidate);
+
+    if ($baseSlug === '') {
+        $baseSlug = 'prispevek';
+    }
+
+    $slug = $baseSlug;
+    $counter = 2;
+
+    while (R::count('post', ' slug = ? AND id != ? ', [$slug, $currentId ?? 0])) {
+        $slug = $baseSlug . '-' . $counter;
+        $counter++;
+    }
+
+    return $slug;
+}
+
+function adminSlugify(string $text): string
+{
+    $text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+    $text = strtolower($text);
+    $text = preg_replace('/[^a-z0-9]+/i', '-', $text);
+    $text = trim($text, '-');
+
+    return $text;
 }

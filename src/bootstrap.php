@@ -4,6 +4,7 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../packages/upload-manager/src/UploadManager.php';
 require __DIR__ . '/settings.php';
 
 $configPath = __DIR__ . '/../config/config.php';

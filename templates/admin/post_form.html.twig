@@ -16,7 +16,7 @@
     </div>
 {% endif %}
 
-<form method="post" class="row g-3">
+<form method="post" class="row g-3" enctype="multipart/form-data">
     {% if post %}
         <input type="hidden" name="id" value="{{ post.id }}">
     {% endif %}
@@ -33,9 +33,21 @@
     </div>
 
     <div class="col-md-6">
+        <label class="form-label" for="thumbnail_upload">Nebo nahraj obrázek</label>
+        <input class="form-control" type="file" id="thumbnail_upload" name="thumbnail_upload" accept="image/*">
+        <div class="form-text">Obrázek se uloží do struktury <code>uploads/images/Y/m</code> a vyplní URL automaticky.</div>
+    </div>
+
+    <div class="col-md-6">
         <label class="form-label" for="tags">Štítky</label>
         <input class="form-control" type="text" id="tags" name="tags" value="{{ post.tags ?? '' }}" placeholder="např. technologie, novinky">
         <div class="form-text">Odděluj čárkou. Pomáhají seřadit obsah a usnadňují filtrování.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label" for="slug">SEO adresa (slug)</label>
+        <input class="form-control" type="text" id="slug" name="slug" value="{{ post.slug ?? '' }}" placeholder="např. super-clanek">
+        <div class="form-text">Nevyplněné pole se doplní automaticky z názvu a vynutí se unikátní hodnota.</div>
     </div>
 
     <div class="col-12">

@@ -53,11 +53,40 @@ switch ($action) {
         break;
 
     case 'users':
+        [$errors, $formUser] = adminManageUsers();
         $users = R::findAll('user', ' ORDER BY created_at DESC ');
         echo $twig->render('admin/users.html.twig', [
-            'users' => $users,
-            'user'  => $currentUser,
-            'title' => 'Uživatelé',
+            'users'     => $users,
+            'user'      => $currentUser,
+            'title'     => 'Uživatelé',
+            'roles'     => ADMIN_LEVELS,
+            'form_user' => $formUser,
+            'errors'    => $errors,
+            'saved'     => isset($_GET['saved']),
+        ]);
+        break;
+
+    case 'uploads':
+        [$errors, $success] = adminHandleUpload();
+        $imageSuccess = null;
+        $fileSuccess = null;
+
+        if (!$errors && $success) {
+            if (($_POST['upload_type'] ?? 'image') === 'file') {
+                $fileSuccess = $success;
+            } else {
+                $imageSuccess = $success;
+            }
+        }
+
+        echo $twig->render('admin/uploads.html.twig', [
+            'user'          => $currentUser,
+            'title'         => 'Uploady',
+            'image_errors'  => ($_POST['upload_type'] ?? 'image') === 'image' ? $errors : [],
+            'file_errors'   => ($_POST['upload_type'] ?? 'image') === 'file' ? $errors : [],
+            'image_success' => $imageSuccess,
+            'file_success'  => $fileSuccess,
+            'now'           => new DateTimeImmutable('now'),
         ]);
         break;
 

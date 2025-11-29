@@ -1,0 +1,11 @@
+{
+    "name": "webappka/upload-manager",
+    "description": "Jednoduchý správce uploadů se složkováním ve stylu WordPressu",
+    "version": "1.0.0",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Web\\App\\": "src/"
+        }
+    }
+}
