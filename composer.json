@@ -5,14 +5,9 @@
     "require": {
         "gabordemooij/redbean": "^5.7",
         "twig/twig": "^3.11",
-        "webappka/upload-manager": "^1.0"
+        "cocur/slugify": "^4.5",
+        "twbs/bootstrap": "^5.3"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "packages/upload-manager"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Web\\App\\": "src/"

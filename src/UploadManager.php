@@ -2,15 +2,19 @@
 
 namespace Web\App;
 
+use Cocur\Slugify\Slugify;
+
 class UploadManager
 {
     private string $basePath;
     private string $publicPrefix;
+    private ?Slugify $slugifier;
 
-    public function __construct(?string $basePath = null, string $publicPrefix = '/uploads')
+    public function __construct(?string $basePath = null, string $publicPrefix = '/uploads', ?Slugify $slugifier = null)
     {
-        $this->basePath = $basePath ?: dirname(__DIR__, 2) . '/uploads';
+        $this->basePath = $basePath ?: dirname(__DIR__) . '/uploads';
         $this->publicPrefix = rtrim($publicPrefix, '/');
+        $this->slugifier = class_exists(Slugify::class) ? ($slugifier ?: new Slugify()) : null;
     }
 
     public function storeImage(array $file): string
@@ -48,6 +52,24 @@ class UploadManager
         return $this->publicPrefix . '/' . $type . '/' . $dateSegment . '/' . $uniqueName;
     }
 
+    private function slugify(string $text): string
+    {
+        if ($this->slugifier instanceof Slugify) {
+            return $this->slugifier->slugify($text);
+        }
+
+        return $this->fallbackSlugify($text);
+    }
+
+    private function fallbackSlugify(string $text): string
+    {
+        $text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/i', '-', $text);
+
+        return trim($text, '-');
+    }
+
     private function assertValidUpload(array $file): void
     {
         if (!isset($file['error']) || is_array($file['error'])) {
@@ -71,17 +93,6 @@ class UploadManager
     {
         $now = new \DateTimeImmutable('now');
         return $now->format('Y') . '/' . $now->format('m');
-    }
-
-    private function slugify(string $text): string
-    {
-        $text = preg_replace('~[\p{L}\p{N}]+~u', '$0', $text);
-        $text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
-        $text = strtolower($text);
-        $text = preg_replace('/[^a-z0-9]+/i', '-', $text);
-        $text = trim($text, '-');
-
-        return $text;
     }
 
     private function resolveExtension(string $filename): string
