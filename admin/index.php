@@ -32,6 +32,9 @@ $currentUser = adminCurrentUser();
 switch ($action) {
     case 'posts':
         $posts = R::findAll('post', ' ORDER BY published_at DESC ');
+        foreach ($posts as $post) {
+            hydratePostWithRelations($post);
+        }
         echo $twig->render('admin/posts.html.twig', [
             'posts'  => $posts,
             'user'   => $currentUser,
@@ -43,12 +46,69 @@ switch ($action) {
         $errors = adminSavePost();
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
         $post = $id ? R::load('post', $id) : null;
+        $postTypes = fetchAllPostTypes();
+        $categories = fetchAllCategories();
+        $tags = fetchAllTags();
+        $selectedCategories = $post ? fetchPostCategoryIds((int) $post->id) : [];
+        $selectedTags = $post ? fetchPostTagIds((int) $post->id) : [];
+        $selectedPostType = $post->post_type_id ?? ($postTypes[0]['id'] ?? null);
 
         echo $twig->render('admin/post_form.html.twig', [
-            'errors' => $errors,
-            'post'   => $post,
-            'user'   => $currentUser,
-            'title'  => $id ? 'Upravit příspěvek' : 'Nový příspěvek',
+            'errors'             => $errors,
+            'post'               => $post,
+            'user'               => $currentUser,
+            'title'              => $id ? 'Upravit příspěvek' : 'Nový příspěvek',
+            'post_types'         => $postTypes,
+            'categories'         => $categories,
+            'tags'               => $tags,
+            'selected_categories'=> $selectedCategories,
+            'selected_tags'      => $selectedTags,
+            'selected_post_type' => $selectedPostType,
+        ]);
+        break;
+
+    case 'categories':
+        [$errors, $saved, $editing] = adminManageTaxonomy('category');
+        $categories = fetchAllCategories();
+        echo $twig->render('admin/taxonomy.html.twig', [
+            'errors'     => $errors,
+            'items'      => $categories,
+            'user'       => $currentUser,
+            'title'      => 'Kategorie',
+            'type_label' => 'kategorie',
+            'action_key' => 'categories',
+            'saved'      => $saved,
+            'editing'    => $editing,
+        ]);
+        break;
+
+    case 'tags':
+        [$errors, $saved, $editing] = adminManageTaxonomy('tag');
+        $tags = fetchAllTags();
+        echo $twig->render('admin/taxonomy.html.twig', [
+            'errors'     => $errors,
+            'items'      => $tags,
+            'user'       => $currentUser,
+            'title'      => 'Štítky',
+            'type_label' => 'štítek',
+            'action_key' => 'tags',
+            'saved'      => $saved,
+            'editing'    => $editing,
+        ]);
+        break;
+
+    case 'post_types':
+        [$errors, $saved, $editing] = adminManageTaxonomy('post_type');
+        $types = fetchAllPostTypes();
+        echo $twig->render('admin/taxonomy.html.twig', [
+            'errors'     => $errors,
+            'items'      => $types,
+            'user'       => $currentUser,
+            'title'      => 'Typy obsahu',
+            'type_label' => 'typ obsahu',
+            'action_key' => 'post_types',
+            'saved'      => $saved,
+            'editing'    => $editing,
         ]);
         break;
 

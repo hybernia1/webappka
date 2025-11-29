@@ -1,0 +1,79 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ title }}</h2>
+    <a class="btn btn-outline-secondary" href="?action=post_edit">Nový příspěvek</a>
+</div>
+
+{% if saved %}
+    <div class="alert alert-success">Změny byly uloženy.</div>
+{% endif %}
+
+{% if errors %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<form method="post" class="card mb-4 shadow-sm">
+    <div class="card-body row g-3">
+        {% if editing %}
+            <input type="hidden" name="id" value="{{ editing.id }}">
+            <div class="col-12">
+                <div class="alert alert-info mb-0">Upravuješ {{ type_label }} <strong>{{ editing.name }}</strong>. Pro nový záznam formulář vyčisti.</div>
+            </div>
+        {% endif %}
+        <div class="col-md-6">
+            <label class="form-label" for="name">Název {{ type_label }}</label>
+            <input class="form-control" type="text" id="name" name="name" placeholder="Např. Novinky" value="{{ editing.name ?? '' }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="slug">Slug</label>
+            <input class="form-control" type="text" id="slug" name="slug" placeholder="vychozi-slug" value="{{ editing.slug ?? '' }}">
+            <div class="form-text">Pokud slug nevyplníš, doplní se automaticky.</div>
+        </div>
+        <div class="col-12">
+            <label class="form-label" for="description">Popis</label>
+            <textarea class="form-control" id="description" name="description" rows="2" placeholder="Krátké vysvětlení">{{ editing.description ?? '' }}</textarea>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-success" type="submit">Uložit {{ type_label }}</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Název</th>
+                <th>Slug</th>
+                <th>Popis</th>
+                <th class="text-end">Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td class="fw-semibold">{{ item.name }}</td>
+                    <td><code>{{ item.slug }}</code></td>
+                    <td>{{ item.description ?? '—' }}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary me-2" href="?action={{ action_key }}&edit={{ item.id }}">Upravit</a>
+                        <a class="btn btn-sm btn-outline-danger" href="?action={{ action_key }}&delete={{ item.id }}">Smazat</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Zatím žádné položky.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

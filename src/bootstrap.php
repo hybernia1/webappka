@@ -6,6 +6,7 @@ use Twig\Loader\FilesystemLoader;
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/schema.php';
+require __DIR__ . '/content.php';
 
 $configPath = __DIR__ . '/../config/config.php';
 

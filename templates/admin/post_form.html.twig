@@ -27,6 +27,16 @@
     </div>
 
     <div class="col-md-6">
+        <label class="form-label" for="post_type_id">Typ obsahu</label>
+        <select class="form-select" id="post_type_id" name="post_type_id" required>
+            {% for type in post_types %}
+                <option value="{{ type.id }}" {% if selected_post_type == type.id %}selected{% endif %}>{{ type.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="form-text">Typy obsahu spravuješ v sekci „Typy obsahu“.</div>
+    </div>
+
+    <div class="col-md-6">
         <label class="form-label" for="thumbnail_url">Náhledový obrázek (URL)</label>
         <input class="form-control" type="url" id="thumbnail_url" name="thumbnail_url" value="{{ post.thumbnail_url ?? '' }}" placeholder="https://...">
         <div class="form-text">Zadej kompletní URL k obrázku. Pole je nepovinné.</div>
@@ -39,9 +49,23 @@
     </div>
 
     <div class="col-md-6">
+        <label class="form-label" for="categories">Kategorie</label>
+        <select class="form-select" id="categories" name="categories[]" multiple size="5">
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id in selected_categories %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="form-text">Spravuj dostupné kategorie v sekci „Kategorie“.</div>
+    </div>
+
+    <div class="col-md-6">
         <label class="form-label" for="tags">Štítky</label>
-        <input class="form-control" type="text" id="tags" name="tags" value="{{ post.tags ?? '' }}" placeholder="např. technologie, novinky">
-        <div class="form-text">Odděluj čárkou. Pomáhají seřadit obsah a usnadňují filtrování.</div>
+        <select class="form-select" id="tags" name="tags[]" multiple size="5">
+            {% for tag in tags %}
+                <option value="{{ tag.id }}" {% if tag.id in selected_tags %}selected{% endif %}>{{ tag.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="form-text">Štítky pomáhají seřadit obsah. Přidej nové v sekci „Štítky“.</div>
     </div>
 
     <div class="col-md-6">
