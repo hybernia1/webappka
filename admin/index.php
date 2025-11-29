@@ -1,4 +1,6 @@
 <?php
+use RedBeanPHP\R as R;
+
 require __DIR__ . '/../src/bootstrap.php';
 require __DIR__ . '/../src/admin.php';
 
