@@ -4,15 +4,20 @@
     "type": "project",
     "require": {
         "gabordemooij/redbean": "^5.7",
-        "twig/twig": "^3.11",
-        "cocur/slugify": "^4.5",
+        "twig/twig": "^3.0",
+        "cocur/slugify": "^3.2",
         "twbs/bootstrap": "^5.3",
-        "symfony/http-foundation": "^7.2",
-        "symfony/routing": "^7.2",
-        "symfony/validator": "^7.2",
-        "symfony/http-client": "^7.2",
-        "symfony/mailer": "^7.2",
-        "symfony/mime": "^7.2"
+        "symfony/http-foundation": "^5.4",
+        "symfony/routing": "^5.4",
+        "symfony/validator": "^5.4",
+        "symfony/http-client": "^5.4",
+        "symfony/mailer": "^5.4",
+        "symfony/mime": "^5.4"
+    },
+    "config": {
+        "platform": {
+            "php": "7.3.3"
+        }
     },
     "autoload": {
         "psr-4": {
