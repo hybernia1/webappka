@@ -1,0 +1,11 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<h2>Přehled</h2>
+<p>Vítej zpět, {{ user.username }}.</p>
+
+<div class="stats">
+    <p><strong>Příspěvky:</strong> {{ postCount }}</p>
+    <p><strong>Uživatelé:</strong> {{ userCount }}</p>
+</div>
+{% endblock %}

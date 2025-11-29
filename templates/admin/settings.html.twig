@@ -1,0 +1,27 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<h2>Nastavení</h2>
+
+{% if saved %}
+    <div class="alert success">Nastavení bylo uloženo.</div>
+{% endif %}
+
+{% if errors %}
+    <div class="alert error">
+        {% for error in errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<form method="post">
+    <label for="site_name">Název webu</label>
+    <input type="text" id="site_name" name="site_name" value="{{ settings.site_name ?? site_name }}" required>
+
+    <label for="base_url">Základní URL</label>
+    <input type="text" id="base_url" name="base_url" value="{{ settings.base_url ?? base_url }}" placeholder="/">
+
+    <button type="submit">Uložit</button>
+</form>
+{% endblock %}
