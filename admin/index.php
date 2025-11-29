@@ -63,7 +63,7 @@ switch ($action) {
 
     case 'settings':
         $errors = adminSaveSettings();
-        $settings = fetchSettings();
+        $settings = getSettingsWithDefaults();
         echo $twig->render('admin/settings.html.twig', [
             'errors'   => $errors,
             'settings' => $settings,

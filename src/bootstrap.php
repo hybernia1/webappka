@@ -4,6 +4,7 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/settings.php';
 
 $configPath = __DIR__ . '/../config/config.php';
 
@@ -41,12 +42,9 @@ $twig = new Environment($loader, [
     'cache' => false,
 ]);
 
-$settingsMap = [];
-$settings = R::findAll('setting');
-foreach ($settings as $setting) {
-    $settingsMap[$setting->key] = $setting->value;
-}
+$settingsMap = fetchSettings();
+$settingsWithDefaults = getSettingsWithDefaults();
 
-$twig->addGlobal('site_name', $settingsMap['site_name'] ?? $config['site_name'] ?? 'Webappka CMS');
-$twig->addGlobal('base_url', $settingsMap['base_url'] ?? $config['base_url'] ?? '/');
+$twig->addGlobal('site_name', $settingsWithDefaults['site_name']);
+$twig->addGlobal('base_url', $settingsWithDefaults['base_url']);
 $twig->addGlobal('settings', $settingsMap);

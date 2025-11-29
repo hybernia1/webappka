@@ -1,27 +1,56 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% block admin_content %}
-<h2>{{ title }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ title }}</h2>
+    <a class="btn btn-outline-secondary" href="?action=posts">Zpět na přehled</a>
+</div>
 
 {% if errors %}
-    <div class="alert error">
-        {% for error in errors %}
-            <p>{{ error }}</p>
-        {% endfor %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
     </div>
 {% endif %}
 
-<form method="post">
+<form method="post" class="row g-3">
     {% if post %}
         <input type="hidden" name="id" value="{{ post.id }}">
     {% endif %}
 
-    <label for="title">Název</label>
-    <input type="text" id="title" name="title" value="{{ post.title ?? '' }}" required>
+    <div class="col-12">
+        <label class="form-label" for="title">Název</label>
+        <input class="form-control" type="text" id="title" name="title" value="{{ post.title ?? '' }}" required>
+    </div>
 
-    <label for="content">Obsah</label>
-    <textarea id="content" name="content" rows="10">{{ post.content ?? '' }}</textarea>
+    <div class="col-md-6">
+        <label class="form-label" for="thumbnail_url">Náhledový obrázek (URL)</label>
+        <input class="form-control" type="url" id="thumbnail_url" name="thumbnail_url" value="{{ post.thumbnail_url ?? '' }}" placeholder="https://...">
+        <div class="form-text">Zadej kompletní URL k obrázku. Pole je nepovinné.</div>
+    </div>
 
-    <button type="submit">Uložit</button>
+    <div class="col-md-6">
+        <label class="form-label" for="tags">Štítky</label>
+        <input class="form-control" type="text" id="tags" name="tags" value="{{ post.tags ?? '' }}" placeholder="např. technologie, novinky">
+        <div class="form-text">Odděluj čárkou. Pomáhají seřadit obsah a usnadňují filtrování.</div>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label" for="excerpt">Krátký popis</label>
+        <textarea class="form-control" id="excerpt" name="excerpt" rows="3" placeholder="Stručný úvod nebo anotace článku">{{ post.excerpt ?? '' }}</textarea>
+        <div class="form-text">Používá se jako perex a zobrazuje se ve výpisech.</div>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label" for="content">Obsah</label>
+        <textarea class="form-control" id="content" name="content" rows="10">{{ post.content ?? '' }}</textarea>
+    </div>
+
+    <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-success" type="submit">Uložit</button>
+    </div>
 </form>
 {% endblock %}

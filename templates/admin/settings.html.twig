@@ -1,27 +1,39 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% block admin_content %}
-<h2>Nastavení</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Nastavení</h2>
+    <a class="btn btn-outline-secondary" href="?action=dashboard">Zpět na přehled</a>
+</div>
 
 {% if saved %}
-    <div class="alert success">Nastavení bylo uloženo.</div>
+    <div class="alert alert-success">Nastavení bylo uloženo.</div>
 {% endif %}
 
 {% if errors %}
-    <div class="alert error">
-        {% for error in errors %}
-            <p>{{ error }}</p>
-        {% endfor %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
     </div>
 {% endif %}
 
-<form method="post">
-    <label for="site_name">Název webu</label>
-    <input type="text" id="site_name" name="site_name" value="{{ settings.site_name ?? site_name }}" required>
+<form class="row g-3" method="post">
+    <div class="col-md-6">
+        <label class="form-label" for="site_name">Název webu</label>
+        <input class="form-control" type="text" id="site_name" name="site_name" value="{{ settings.site_name ?? site_name }}" required>
+    </div>
 
-    <label for="base_url">Základní URL</label>
-    <input type="text" id="base_url" name="base_url" value="{{ settings.base_url ?? base_url }}" placeholder="/">
+    <div class="col-md-6">
+        <label class="form-label" for="base_url">Základní URL</label>
+        <input class="form-control" type="text" id="base_url" name="base_url" value="{{ settings.base_url ?? base_url }}" placeholder="/">
+        <div class="form-text">Zadávej relativně k doméně (např. "/" nebo "/blog/").</div>
+    </div>
 
-    <button type="submit">Uložit</button>
+    <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-success" type="submit">Uložit</button>
+    </div>
 </form>
 {% endblock %}

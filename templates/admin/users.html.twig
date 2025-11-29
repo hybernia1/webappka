@@ -1,29 +1,33 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% block admin_content %}
-<h2>Uživatelé</h2>
-<p>Tento náhled je zatím jen pro čtení. Nové účty vytvářej během instalace nebo přímo v databázi.</p>
+<div class="mb-3">
+    <h2 class="mb-1">Uživatelé</h2>
+    <p class="text-muted">Tento náhled je zatím jen pro čtení. Nové účty vytvářej během instalace nebo přímo v databázi.</p>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Uživatel</th>
-            <th>Role</th>
-            <th>Vytvořen</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for usr in users %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead class="table-light">
             <tr>
-                <td>{{ usr.username }}</td>
-                <td>{{ usr.role }}</td>
-                <td>{{ usr.created_at|date('j.n.Y H:i') }}</td>
+                <th>Uživatel</th>
+                <th>Role</th>
+                <th>Vytvořen</th>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">Žádní uživatelé.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for usr in users %}
+                <tr>
+                    <td class="fw-semibold">{{ usr.username }}</td>
+                    <td>{{ usr.role }}</td>
+                    <td>{{ usr.created_at|date('j.n.Y H:i') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Žádní uživatelé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

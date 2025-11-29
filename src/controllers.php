@@ -1,18 +1,6 @@
 <?php
 use RedBeanPHP\R as R;
 
-function fetchSettings(): array
-{
-    $settings = R::findAll('setting');
-    $result = [];
-
-    foreach ($settings as $setting) {
-        $result[$setting->key] = $setting->value;
-    }
-
-    return $result;
-}
-
 function homeController($twig)
 {
     $posts = R::findAll('post', ' ORDER BY published_at DESC ');

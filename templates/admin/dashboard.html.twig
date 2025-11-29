@@ -1,11 +1,40 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% block admin_content %}
-<h2>Přehled</h2>
-<p>Vítej zpět, {{ user.username }}.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Přehled</h2>
+        <p class="text-muted mb-0">Vítej zpět, {{ user.username }}.</p>
+    </div>
+    <a class="btn btn-primary" href="?action=post_edit">Nový příspěvek</a>
+</div>
 
-<div class="stats">
-    <p><strong>Příspěvky:</strong> {{ postCount }}</p>
-    <p><strong>Uživatelé:</strong> {{ userCount }}</p>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">Příspěvky</p>
+                        <h4 class="mb-0">{{ postCount }}</h4>
+                    </div>
+                    <i class="bi bi-journal-text text-primary fs-1"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">Uživatelé</p>
+                        <h4 class="mb-0">{{ userCount }}</h4>
+                    </div>
+                    <i class="bi bi-people text-success fs-1"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
