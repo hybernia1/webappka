@@ -1,0 +1,74 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Správa uploadů</h2>
+    <a class="btn btn-outline-secondary" href="?action=posts">Zpět na příspěvky</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Nahraj obrázek</h5>
+                <p class="text-muted">Uloží se do cesty <code>uploads/images/{{ now|date('Y') }}/{{ now|date('m') }}</code> podobně jako ve WordPressu.</p>
+
+                {% if image_success %}
+                    <div class="alert alert-success">Uloženo: <code>{{ image_success }}</code></div>
+                {% endif %}
+
+                {% if image_errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for error in image_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="image">
+                    <div class="mb-3">
+                        <label class="form-label" for="image_upload">Vyber obrázek</label>
+                        <input class="form-control" type="file" id="image_upload" name="uploaded_file" accept="image/*" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Nahrát obrázek</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Nahraj soubor</h5>
+                <p class="text-muted">Ostatní soubory směřují do <code>uploads/files/{{ now|date('Y') }}/{{ now|date('m') }}</code>.</p>
+
+                {% if file_success %}
+                    <div class="alert alert-success">Uloženo: <code>{{ file_success }}</code></div>
+                {% endif %}
+
+                {% if file_errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for error in file_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="file">
+                    <div class="mb-3">
+                        <label class="form-label" for="file_upload">Vyber soubor</label>
+                        <input class="form-control" type="file" id="file_upload" name="uploaded_file" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Nahrát soubor</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

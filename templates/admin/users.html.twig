@@ -3,7 +3,65 @@
 {% block admin_content %}
 <div class="mb-3">
     <h2 class="mb-1">Uživatelé</h2>
-    <p class="text-muted">Tento náhled je zatím jen pro čtení. Nové účty vytvářej během instalace nebo přímo v databázi.</p>
+    <p class="text-muted">Spravuj role i úrovně přístupů. Úroveň roste s vyšší rolí a používá se pro omezení kritických akcí.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">{{ form_user ? 'Upravit uživatele' : 'Nový uživatel' }}</h5>
+
+                {% if errors %}
+                    <div class="alert alert-danger py-2">
+                        <ul class="mb-0">
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if saved %}
+                    <div class="alert alert-success py-2 mb-3">Změny byly uloženy.</div>
+                {% endif %}
+
+                <form method="post" class="row g-3">
+                    {% if form_user %}
+                        <input type="hidden" name="id" value="{{ form_user.id }}">
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label" for="username">Uživatelské jméno</label>
+                        <input class="form-control" type="text" id="username" name="username" value="{{ form_user.username ?? '' }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="password">Heslo</label>
+                        <input class="form-control" type="password" id="password" name="password" placeholder="{{ form_user ? 'Ponech prázdné pro zachování' : 'Zadej heslo' }}">
+                        <div class="form-text">Heslo vyplň jen při změně.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="role">Role</label>
+                        <select class="form-select" id="role" name="role">
+                            {% for role, level in roles %}
+                                <option value="{{ role }}" {% if form_user and form_user.role == role %}selected{% endif %}>{{ role }} ({{ level }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Úroveň přístupu je uvedena v závorce.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-success" type="submit">{{ form_user ? 'Uložit změny' : 'Vytvořit účet' }}</button>
+                        {% if form_user %}
+                            <a class="btn btn-outline-secondary ms-2" href="?action=users">Zrušit úpravy</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="table-responsive">
@@ -12,7 +70,9 @@
             <tr>
                 <th>Uživatel</th>
                 <th>Role</th>
+                <th>Úroveň</th>
                 <th>Vytvořen</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -20,11 +80,13 @@
                 <tr>
                     <td class="fw-semibold">{{ usr.username }}</td>
                     <td>{{ usr.role }}</td>
+                    <td>{{ usr.level ?? '–' }}</td>
                     <td>{{ usr.created_at|date('j.n.Y H:i') }}</td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="?action=users&id={{ usr.id }}">Upravit</a></td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="3" class="text-center text-muted">Žádní uživatelé.</td>
+                    <td colspan="5" class="text-center text-muted">Žádní uživatelé.</td>
                 </tr>
             {% endfor %}
         </tbody>

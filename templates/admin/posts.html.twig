@@ -12,6 +12,7 @@
             <tr>
                 <th style="width: 56px"></th>
                 <th>Název</th>
+                <th>SEO URL</th>
                 <th>Publikováno</th>
                 <th>Štítky</th>
                 <th class="text-end">Akce</th>
@@ -29,6 +30,7 @@
                         {% endif %}
                     </td>
                     <td class="fw-semibold">{{ post.title }}</td>
+                    <td><code>{{ post.slug ?? '' }}</code></td>
                     <td>{{ post.published_at|date('j.n.Y H:i') }}</td>
                     <td>
                         {% for tag in tags %}
